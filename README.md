@@ -25,6 +25,14 @@ As a book lender/seller, I want to delete posts, so that I know the book that th
 
 As a book lender/seller, I want to be able to add an attribute to a post about whether I'm selling or lending this book, so that other people can know my intention clearly.
 
+As a book lender/seller, I want to be able to set the selling/rental price of my book, so that I can control my earnings based on the value of the book.
+
+As a book lender/seller, I want to set a book as pending or available, so that I stop receiving unneeded messages if I am already negotiating with a number of buyers/borrowers.
+
+As a book lender, I want to see borrower ratings and reviews before approving a request so that I feel secure lending my book.
+
+As a book lender, I want to set and keep track of the length of the rental period, so that I can get my book back on time.
+
 ### User Type B (Book Borrower/Buyer)
 
 As a book borrower/buyer, I want to see how many people want to borrow the book in a post, so that I can estimate my chance of getting this book and act accordingly.
@@ -36,6 +44,10 @@ As a book borrower/buyer, I want to delete/unlike posts in a hub after I do not 
 As a book borrower/buyer, I want to have a search bar to look for books I want, so that I can find books more efficiently.
 
 As a book borrower/buyer, I want to see the contact information of the person who sent the post, so that I can get talk with them about the book I want.
+
+As a book borrower/buyer, I want to filter book by genre, so that I can browse specifically for books that are to my taste.
+
+As a book borrower/buyer, I want to compare prices between listings of the same book so that I can get a better deal.
 
 
 [Link to our Issues page!](https://github.com/swe-students-spring2026/2-web-app-echo_elk/issues)
