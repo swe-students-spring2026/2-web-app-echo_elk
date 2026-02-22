@@ -73,9 +73,33 @@ source venv/Scripts/activate
 ```
 
 ```shell
-# Install `flask`, ..., in your venv.
-pip install flask
+# Install flask, pymongo, dotenv, in your venv.
+pip install flask pymongo dotenv
 ```
+
+To run the following command, download `mongosh` [here](https://www.mongodb.com/try/download/shell) (*the default command line client program*.)
+```shell
+# Connect to the database server database's connection string:
+mongosh "mongodb+srv://2-web-app-echo-elk.8e6mdjj.mongodb.net/" --apiVersion 1 --username echo-elk
+# You will be prompted to enter your database user password after running that command.
+```
+
+```shell
+# define a unique name for the database.
+use your_db_name # e.g. echo-elk
+```
+
+```shell
+# prove that you are logged into a Javascript command-line interface to MongoDB.
+1+1
+# if you see 2, things work out fine!
+```
+
+```shell
+# To exit mongosh, type:
+exit
+```
+
 ## Task boards
 
 [Link to our Task Board!](https://github.com/orgs/swe-students-spring2026/projects/34/views/2)
