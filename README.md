@@ -55,16 +55,27 @@ As a book borrower/buyer, I want to compare prices between listings of the same 
 
 See instructions. Delete this line and place instructions to download, configure, and run the software here.
 
-First, clone this repository.\
-`git clone https://github.com/swe-students-spring2026/2-web-app-echo_elk.git`
+```shell
+# First, clone this repository.
+git clone https://github.com/swe-students-spring2026/2-web-app-echo_elk.git
+```
 
 If you use a windows, switch to git bash and then proceed. If you use a unix-like os, just proceed.
 
-Setup a python virtual environment (venv/.venv).\
-`python -m venv venv`
+```shell
+# Setup a python virtual environment (venv/.venv).
+python -m venv venv
+```
 
-Activate the virtual environment.\
-`source venv/Scripts/activate`
+```shell
+# Activate the virtual environment.
+source venv/Scripts/activate
+```
+
+```shell
+# Install `flask`, ..., in your venv.
+pip install flask
+```
 ## Task boards
 
 [Link to our Task Board!](https://github.com/orgs/swe-students-spring2026/projects/34/views/2)
