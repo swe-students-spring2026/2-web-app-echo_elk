@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="login-container">
+    <h2>Login to Book Exchange</h2>
+
+    {% if error %}
+        <p class="error-text">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" id="password_input" placeholder="Password" required>
+
+        <div class="toggle-container">
+            <input type="checkbox" id="toggle_checkbox" onclick="togglePassword()">
+            <label for="toggle_checkbox">Show Password</label>
+        </div>
+
+        <button type="submit">Login</button>
+    </form>
+    <p>Don't have an account? <a href="/register">Sign up</a></p>
+</div>
+{% endblock %}
