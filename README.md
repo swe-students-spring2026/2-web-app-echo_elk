@@ -74,7 +74,7 @@ source venv/Scripts/activate
 
 ```shell
 # Install flask, pymongo, dotenv, in your venv.
-pip install flask pymongo dotenv
+pip install flask flask-login pymongo dotenv
 ```
 
 To run the following command, download `mongosh` [here](https://www.mongodb.com/try/download/shell) (*the default command line client program*.)
