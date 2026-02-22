@@ -8,7 +8,7 @@
         <h3>{{ book.title }}</h3>
         <p>By: {{ book.author }}</p>
         <p>lender: {{ book.lender_name }}</p>
-        <p>Interested: {{ book.num_ppl_wanted }}</p>
+        <p>Interested: <span class="interest-count">{{ book.num_ppl_wanted }}</span></p>
         <button class="like-btn" data-id="{{ book._id }}">I want to borrow/buy</button>
     </div>
     {% endfor %}

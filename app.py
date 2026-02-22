@@ -5,12 +5,12 @@ and defines the route for each of all 6 screens,
 user authentication, and database interaction.
 """
 import os
+import datetime
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from bson.objectid import ObjectId
-import datetime
 from pymongo import MongoClient
 
 # Import the custom database module we wrote
@@ -136,13 +136,49 @@ def create_post():
         # $push adds the ID to the array without overwriting existing ones
         db.users.update_one(
             {"_id": ObjectId(current_user.id)},
-            {"$push": {"sent_post": current_post_id}}
+            {"$push": {"sent_posts": current_post_id}}
         )
         # 'flash' is a bit of an annoying way to show a message.
         # try to find another way that does not stop the flow of interaction.
         flash("Book posted successfully!")
         return redirect(url_for('home'))
     return render_template('create_post.html')
+
+@app.route('/like-book/<book_id>', methods=['POST'])
+@login_required
+def like_book(book_id):
+    """
+    When a user clicks the 'Like' button on a book post, this route is triggered.
+    Find the book and increment the 'num_ppl_wanted' field by 1.
+    """
+    user_id = ObjectId(current_user.id)
+    bk_id = ObjectId(book_id)
+
+    current_bk = db.posts.find_one({"_id": bk_id})
+    # Check if this book is in the user's 'sent_posts' list.
+    # If yes, they are the lender, and they shouldn't be able to like their own book.
+    if str(current_bk.get('lender_id')) == str(current_user.id):
+        return {"error": "Are you trying to like your own post? LOL"}, 400
+    # Check if the user has already liked this book.
+    # Because, reasonably, a user should only like a book once.
+    user = db.users.find_one({"_id": user_id, "liked_posts": bk_id})
+    if user:
+        return {"error": "You have already liked this book."}, 400
+    # If first time liking, add the book ID to the user's 'liked_posts' list.
+    db.users.update_one(
+        {"_id": user_id},
+        {"$push": {"liked_posts": bk_id}}
+    )
+
+    # increment the book's 'num_ppl_wanted' count.
+    result = db.posts.find_one_and_update(
+        {"_id": ObjectId(book_id)},
+        {"$inc": {"num_ppl_wanted": 1}},
+        return_document=True
+    )
+    if result:
+        return {"new_count": result.get('num_ppl_wanted', 0)}, 200
+    return {"error": "Book not found"}, 404 # Should never happen, but good to have.
 
 @app.route('/book/<book_id>')
 @login_required
