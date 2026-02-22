@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Available Books</h2>
+<div class="book-grid">
+    {% for book in books %}
+    <div class="book-card" onclick="viewDetails('{{ book._id }}')">
+        <h3>{{ book.bookname }}</h3>
+        <p>By: {{ book.author }}</p>
+        <p>Interested: {{ book.how_many_ppl_want_this }}</p>
+        <button class="like-btn" data-id="{{ book._id }}">I want to borrow/buy</button>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
