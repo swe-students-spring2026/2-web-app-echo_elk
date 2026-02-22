@@ -4,12 +4,18 @@
 <h2>Available Books</h2>
 <div class="book-grid">
     {% for book in books %}
-    <div class="book-card" onclick="viewDetails('{{ book._id }}')">
-        <h3>{{ book.bookname }}</h3>
+    <div class="book-post" onclick="viewDetails('{{ book._id }}')"> <!-- viewDetails() is not implemented yet. It should somehow show more information about the book.-->
+        <h3>{{ book.title }}</h3>
         <p>By: {{ book.author }}</p>
-        <p>Interested: {{ book.how_many_ppl_want_this }}</p>
+        <p>lender: {{ book.lender_name }}</p>
+        <p>Interested: {{ book.num_ppl_wanted }}</p>
         <button class="like-btn" data-id="{{ book._id }}">I want to borrow/buy</button>
     </div>
     {% endfor %}
+</div>
+<div class="home-header">
+    <a href="{{ url_for('create_post') }}" class="post-button">
+        + Make a post about a book I want to lend
+    </a>
 </div>
 {% endblock %}

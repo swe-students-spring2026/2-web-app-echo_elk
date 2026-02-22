@@ -106,9 +106,43 @@ def home():
     """
     Fetch all posts from MongoDB.
     """
-    # Need to implement search bar later here.
+    # Need to implement search bar later.
     books = list(db.posts.find())
     return render_template('home.html', books=books)
+
+@app.route('/create-post', methods=['GET', 'POST'])
+@login_required
+def create_post():
+    """
+    Create a new book post.
+    Links the new post ID to the user's 'sent_post' list.
+    """
+    if request.method == 'POST':
+        title = request.form.get('title')
+        author = request.form.get('author')
+        description = request.form.get('description') # create more fields later.
+        new_post = {
+            "title": title,
+            "author": author,
+            "description": description,
+            "lender_id": current_user.id, 
+            "lender_name": current_user.username,
+            'num_ppl_wanted': 0,
+            "created_at": datetime.datetime.now(datetime.timezone.utc)
+        }
+        current_post = db.posts.insert_one(new_post)
+        current_post_id = current_post.inserted_id
+        # Update the current_user's 'sent_post' list with the ID of this new post.
+        # $push adds the ID to the array without overwriting existing ones
+        db.users.update_one(
+            {"_id": ObjectId(current_user.id)},
+            {"$push": {"sent_post": current_post_id}}
+        )
+        # 'flash' is a bit of an annoying way to show a message.
+        # try to find another way that does not stop the flow of interaction.
+        flash("Book posted successfully!")
+        return redirect(url_for('home'))
+    return render_template('create_post.html')
 
 @app.route('/book/<book_id>')
 @login_required
@@ -124,7 +158,7 @@ def book_details(book_id):
 def account():
     """
     Displays the user's account information.
-    Displays the user's username, email, a list of their liked posts, and a list of their sent posts.
+    Displays the user's username, email, a list of liked posts, and a list of their sent posts.
     And a logout button that ends the session and redirects to the login page.
     """
     return render_template('account.html')
