@@ -1,7 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<div class="search-container"> <!-- Implement the search feature later. -->
+    <form action="/" method="GET">
+        <input type="text" name="query" placeholder="Search by genre, author, keyword...">
+        <button type="submit">Search</button>
+    </form>
+</div>
+
 <h2>Available Books</h2>
+
 <div class="book-grid">
     {% for book in books %}
     <div class="book-post" onclick="viewDetails('{{ book._id }}')"> <!-- viewDetails() is not implemented yet. It should somehow show more information about the book.-->
