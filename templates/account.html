@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="account-container">
+    <h2>My Account</h2>
+    
+    <section class="profile-section">
+        <form method="POST" action="{{ url_for('account') }}">
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" value="{{ current_user.username }}" disabled>
+                <small>(Username cannot be changed)</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" name="email" id="email" value="{{ current_user.email }}" placeholder="Enter your email">
+            </div>
+            
+            <button type="submit" class="save-btn">Save Changes</button>
+        </form>
+    </section>
+
+    <hr>
+
+    <section class="posts-section">
+        <h3>My Posts</h3>
+        <div class="book-grid">
+            {% for book in sent_books %}
+                <div class="book-post">
+                    <h4>{{ book.title }}</h4>
+                    <p>Interested: {{ book.num_ppl_wanted }}</p>
+                    </div>
+            {% else %}
+                <p>You haven't posted any books yet.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="posts-section">
+        <h3>Posts I liked</h3>
+        <div class="book-grid">
+            {% for book in liked_books %}
+                <div class="book-post">
+                    <h4>{{ book.title }}</h4>
+                    <p>Lender: {{ book.lender_name }}</p>
+                </div>
+            {% else %}
+                <p>You haven't liked any books yet.</p>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+<div class="account-actions">
+    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+</div>
+{% endblock %}

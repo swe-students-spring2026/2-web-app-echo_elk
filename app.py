@@ -110,6 +110,33 @@ def home():
     books = list(db.posts.find())
     return render_template('home.html', books=books)
 
+@app.route('/account', methods=['GET', 'POST'])
+@login_required
+def account():
+    """
+    Displays the user's account information.
+    Allows the user to update their email address.
+    Has a logout button that ends the session and redirects to the login page.
+    """
+    if request.method == 'POST':
+        new_email = request.form.get('email')
+        # Update the email in MongoDB
+        db.users.update_one(
+            {"_id": ObjectId(current_user.id)},
+            {"$set": {"email": new_email}}
+        )
+        flash("Account updated successfully!", "success")
+        return redirect(url_for('account'))
+
+    # For GET requests, we need to fetch the actual post details
+    # for the IDs stored in liked_posts and sent_posts
+    liked_books = list(db.posts.find({"_id": {"$in": current_user.liked_posts}}))
+    sent_books = list(db.posts.find({"_id": {"$in": current_user.sent_posts}}))
+
+    return render_template('account.html',
+                           liked_books=liked_books,
+                           sent_books=sent_books)
+
 @app.route('/create-post', methods=['GET', 'POST'])
 @login_required
 def create_post():
@@ -188,16 +215,6 @@ def book_details(book_id):
     """
     # logic for fetching single book would go here
     return render_template('book_details.html')
-
-@app.route('/account')
-@login_required
-def account():
-    """
-    Displays the user's account information.
-    Displays the user's username, email, a list of liked posts, and a list of their sent posts.
-    And a logout button that ends the session and redirects to the login page.
-    """
-    return render_template('account.html')
 
 @app.route('/logout')
 @login_required
