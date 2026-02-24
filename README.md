@@ -55,6 +55,8 @@ As a book borrower/buyer, I want to compare prices between listings of the same 
 
 See instructions. Delete this line and place instructions to download, configure, and run the software here.
 
+### As said during lecture, professor wants us to switch to pipenv. Do that later.
+
 ```shell
 # First, clone this repository.
 git clone https://github.com/swe-students-spring2026/2-web-app-echo_elk.git
@@ -75,6 +77,10 @@ source venv/Scripts/activate
 ```shell
 # Install flask, pymongo, dotenv, flask-login in your venv.
 pip install flask flask-login pymongo dotenv
+```
+
+```shell
+# Make sure you did your thing in the editor to select the virtual environment to be the interpreter of the app.py file.
 ```
 
 ```shell
