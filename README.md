@@ -55,8 +55,6 @@ As a book borrower/buyer, I want to compare prices between listings of the same 
 
 See instructions. Delete this line and place instructions to download, configure, and run the software here.
 
-### As said during lecture, professor wants us to switch to pipenv. Do that later.
-
 ```shell
 # First, clone this repository.
 git clone https://github.com/swe-students-spring2026/2-web-app-echo_elk.git
@@ -64,8 +62,35 @@ git clone https://github.com/swe-students-spring2026/2-web-app-echo_elk.git
 
 If you use a windows, switch to git bash and then proceed. If you use a unix-like os, just proceed.
 
+Second, create a virtual environmenet using `pipenv`.
+
+Please make sure you global python interpreter has `pipenv` installed.
+
+If not, do this:
 ```shell
-# Setup a python virtual environment (venv/.venv).
+# Make sure you install 'pipenv' in your prefered 'python.exe'.
+# To see if your prefered python interpreter is the top choice:
+where python
+```
+```shell
+# install pipenv globally
+pip install pipenv
+```
+After you have `pipenv` installed,
+```shell
+# Activate a virtual environment and drop yourself into a new shell that uses that virtualenv’s python.
+pipenv shell
+``` 
+```shell
+# Install the modules
+pipenv install Flask flask-login pymongo python-dotenv
+```
+
+<!-- 
+The out-dated/old-fashioned way to set up a python virtual environment (`venv` in this case).
+
+```shell
+# Setup a python virtual environment using pipvenv.
 python -m venv venv
 ```
 
@@ -78,34 +103,57 @@ source venv/Scripts/activate
 # Install flask, pymongo, dotenv, flask-login in your venv.
 pip install flask flask-login pymongo dotenv
 ```
+-->
 
-```shell
-# Make sure you did your thing in the editor to select the virtual environment to be the interpreter of the app.py file.
-```
+- Make sure you did your thing in the editor to select the virtual environment to be the interpreter of the app.py file.
+    - You would see the path to the designated virtual  environment in your shell after you ran `pipenv shell`, which is what you did before.
+    - Select that path as the interpreter.
 
+- You need one of our team members to have your IP-address so you can access our mongodb atlas database.
+- You also need to create an `.env` file to define `MONGO_DBNAME`, 
+`MONGO_URI`, and
+`SECRET_KEY`, which are some global variables that our app depends on.
+
+Last step:
 ```shell
-# make sure venv is your python interpreter
+# Run the app!
 python app.py
 ```
-Now you should see a link in your shell. Click it and play around!
+Now you should see a link in your shell. Click it and play around.
 
-#### If you want to / have to access our database...
+
+#### If you want to directly play around the database on your shell...
 Run the following command. Make sure you have downloaded `mongosh` [here](https://www.mongodb.com/try/download/shell) (*the default command line client program*.)
 ```shell
 # Connect to the database server:
 mongosh "mongodb+srv://2-web-app-echo-elk.8e6mdjj.mongodb.net/" --apiVersion 1 --username echo-elk
-# You will be prompted to enter your database user password after running that command. Ask our team members for the password. It's a silly one.
+# You will be prompted to enter your database user password. Ask our team members for the password. It's a silly one.
 ```
 
+```shell
+# After you access our databse, prove that you are logged into a Javascript command-line interface to MongoDB.
+1+1
+# You would expect to see 2!
+```
+
+```shell
+# Go into the database that we store users and posts information。
+use echo-elk
+```
+
+If you want to create a new database.
 ```shell
 # define a unique name for the database.
-use your_db_name # e.g. echo-elk
+use your_db_name
 ```
 
+We have two collections in `echo-elk`, they are `users` and `posts`.
+
 ```shell
-# prove that you are logged into a Javascript command-line interface to MongoDB.
-1+1
-# if you see 2, things work out fine!
+# Have a look of all documents in users
+db.users.find()
+# Have a look of all documents in posts
+db.posts.find()
 ```
 
 ```shell
