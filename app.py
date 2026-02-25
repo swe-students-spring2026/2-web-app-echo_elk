@@ -100,15 +100,24 @@ def login():
             return render_template('login.html', error="Invalid username or password")
     return render_template('login.html')
 
-@app.route('/')
+@app.route('/', methods = ['GET'])
 @login_required
 def home():
     """
     Fetch all posts from MongoDB.
     """
-    # Need to implement search bar later.
-    books = list(db.posts.find())
-    return render_template('home.html', books=books)
+    # TODO: Perhaps support search query like
+    # "title:Foo author:Foo Barstein", etc.
+    query = request.args.get('query', '')
+    books = list(db.posts.find({
+            "$or": [
+                {"title": {"$regex": query, "$options": "i"}},
+                {"author": {"$regex": query, "$options": "i"}},
+                {"description": {"$regex": query, "$options": "i"}},
+                {"lender_name": {"$regex": query, "$options": "i"}}
+            ]
+        }))
+    return render_template('home.html', books = books, enteredQuery = query)
 
 @app.route('/account', methods=['GET', 'POST'])
 @login_required
