@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="details-container">
+    <div class="details-card">
+        <h1>{{ book.title }}</h1>
+        <p class="author">By {{ book.author }}</p>
+        
+        <div class="book-info">
+            <!-- 
+            <p><strong>Genre:</strong> {{ book.genre }}</p>
+            <p><strong>Condition:</strong> {{ book.condition }}</p>
+            <p><strong>Lender:</strong> {{ book.lender_name }}</p> 
+            -->
+            <p><strong>Lender:</strong> {{ book.lender_name }}</p> 
+            <p><strong>Description:</strong></p>
+            <p class="description">{{ book.description }}</p>
+        </div>
+        
+        <div class="stats">
+            <p># of People Interested: <span class="interest-count">{{ book.num_ppl_wanted }}</span></p>
+        </div>
+
+        <!-- 
+        Rethink this button logic here. 
+        Show a list of users who liked this post, in a chronical order, 
+            instead of leaving the like button here.
+        -->
+
+
+        <!-- 
+        {% if book.lender_id|string != current_user.id|string %}
+            <button class="like-btn" data-id="{{ book._id }}">I want to borrow/buy</button>
+        {% else %}
+            <p class="owner-note">This is your listing.</p>
+        {% endif %}
+        -->
+    </div>
+    <a href="{{ url_for('home') }}" class="back-link">Back</a>
+</div>
+{% endblock %}
