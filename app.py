@@ -222,8 +222,11 @@ def book_details(book_id):
     """
     Displays detailed data for this book.
     """
-    # logic for fetching single book would go here
-    return render_template('book_details.html')
+    book = db.posts.find_one({"_id": ObjectId(book_id)})
+    if not book:
+        flash("Book not found!", "error")
+        return redirect(url_for('home'))
+    return render_template('book_details.html', book=book)
 
 @app.route('/logout')
 @login_required

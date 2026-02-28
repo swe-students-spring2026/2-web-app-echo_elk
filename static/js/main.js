@@ -13,6 +13,14 @@ function togglePassword() {
 }
 
 /*
+ * The function would be triggered if a user clicks a post in the home route.
+ * This redirects the user to the detailed view of a specific book.
+ */
+function viewDetails(bookId) {
+    window.location.href = `/book/${bookId}`;
+}
+
+/*
  * Handles the "I want to borrow/buy" button click logic.
  * Communicates with the Flask backend to increment the interest count.
  */
