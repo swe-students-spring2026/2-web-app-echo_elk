@@ -21,7 +21,7 @@ As a book lender/seller, I want to send a post about a book that I want to lend,
 
 As a book lender/seller, I want to add more infomation about the book in the post, so that other people can look into the post to see if the book is what they are looking for.
 
-As a book lender/seller, I want to delete posts, so that I know the book that the post shows has been lent and I will not mix them up with books I haven't lent.
+As a book lender/seller, I want to delete posts, so that I have the chance to not lend a book that I still want to keep.
 
 As a book lender/seller, I want to be able to add an attribute to a post about whether I'm selling or lending this book, so that other people can know my intention clearly.
 

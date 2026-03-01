@@ -14,10 +14,10 @@
 <div class="book-grid">
     {% for book in books %}
     <div class="book-post" onclick="viewDetails('{{ book._id }}')">
-        <h3>{{ book.title }}</h3>
-        <p>By: {{ book.author }}</p>
-        <p>lender: {{ book.lender_name }}</p>
-        <p>Interested: <span class="interest-count">{{ book.num_ppl_wanted }}</span></p>
+        <h3>{{ book.title | default("N/A") }}</h3>
+        <p>By: {{ book.author | default("N/A") }}</p>
+        <p>lender: {{ book.lender_name | default("N/A") }}</p>
+        <p>Interested: <span class="interest-count">{{ book.num_ppl_wanted | default("N/A") }}</span></p>
         <button class="like-btn" data-id="{{ book._id }}">I want to borrow/buy</button>
     </div>
     {% endfor %}
