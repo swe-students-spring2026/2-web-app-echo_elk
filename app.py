@@ -137,13 +137,24 @@ def account():
         flash("Account updated successfully!", "success")
         return redirect(url_for('account'))
 
-    # For GET requests, we need to fetch the actual post details
-    # for the IDs stored in liked_posts and sent_posts
-    liked_books = list(db.posts.find({"_id": {"$in": current_user.liked_posts}}))
+    # For GET requests
+    # For the IDs stored in liked_posts
+    # find all post IDs that the user liked, some are deleted
+    liked_ids = current_user.liked_posts
+    # ids exist in both liked_posts and the posts collection
+    found_books = list(db.posts.find({"_id": {"$in": liked_ids}}))
+    found_ids = [post['_id'] for post in found_books]
+    ghost_ids = list(set(liked_ids) - set(found_ids))
+    if ghost_ids:
+        db.users.update_one(
+            {"_id": ObjectId(current_user.id)},
+            {"$pull": {"liked_posts": {"$in": ghost_ids}}}
+        )
+    # for the IDs stored in sent_posts
     sent_books = list(db.posts.find({"_id": {"$in": current_user.sent_posts}}))
 
     return render_template('account.html',
-                           liked_books=liked_books,
+                           liked_books=found_books,
                            sent_books=sent_books)
 
 @app.route('/delete-post/<post_id>', methods=['POST'])
@@ -191,7 +202,7 @@ def create_post():
             "title": title,
             "author": author,
             "description": description,
-            "lender_id": current_user.id, 
+            "lender_id": current_user.id, # should be ObjectId.
             "lender_name": current_user.username,
             'num_ppl_wanted': 0,
             "created_at": datetime.datetime.now(datetime.timezone.utc)
