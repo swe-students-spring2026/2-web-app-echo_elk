@@ -146,6 +146,36 @@ def account():
                            liked_books=liked_books,
                            sent_books=sent_books)
 
+@app.route('/delete-post/<post_id>', methods=['POST'])
+@login_required
+def delete_post(post_id):
+    """
+    Deletes a book post in each user's account page.
+    Removes the post ID from the user's 'sent_posts' list and from all users' 'liked_posts' lists.
+    We don't handle deleting this book's ID for any user that liked this book. 
+    That would be handled when we fetch the posts for the 'liked_posts' list in the account page,
+    when a specific user enters their account page.
+    """
+    p_id = ObjectId(post_id)
+    user_id = ObjectId(current_user.id)
+
+    post = db.posts.find_one({"_id": p_id, "lender_id": str(user_id)})
+    if not post:
+        # 403 means the server does not allow this action. 
+        # This should never happen because the delete button should only show for the lender, 
+        # but good to have just in case.
+        return {"error": "Can't find this post or it's sender!"}, 403
+    # Remove this post's ID from this user's 'sent_posts' field.
+    db.users.update_one({"_id": user_id}, {"$pull": {"sent_posts": p_id}})
+    # Remove this post's ID from the posts collection.
+    db.posts.delete_one({"_id": p_id})
+
+    # Clean up other users' liked lists. But this would be slow if many users.
+    # So we implement another way. See the docstring above for details.
+    # db.users.update_many({"liked_posts": p_id}, {"$pull": {"liked_posts": p_id}})
+    flash("Post successfully deleted!", "success")
+    return redirect(url_for('account'))
+
 @app.route('/create-post', methods=['GET', 'POST'])
 @login_required
 def create_post():
