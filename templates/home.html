@@ -18,7 +18,13 @@
         <p>By: {{ book.author | default("N/A") }}</p>
         <p>lender: {{ book.lender_name | default("N/A") }}</p>
         <p>Interested: <span class="interest-count">{{ book.num_ppl_wanted | default("N/A") }}</span></p>
-        <button class="like-btn" data-id="{{ book._id }}">I want to borrow/buy</button>
+        <button class="like-btn" data-id="{{ book._id }}">
+            {% if book._id in current_user.liked_posts %}
+                Liked! (Click to unlike)
+            {% else %}
+                Like this post.
+    {% endif %}
+        </button>
     </div>
     {% endfor %}
 </div>
