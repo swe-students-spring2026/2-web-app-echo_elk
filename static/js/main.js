@@ -40,23 +40,29 @@ async function handleLikeClick(event) {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
         
+        const data = await response.json();
+
         if (!response.ok){
-            const errorData = await response.json();
-            alert(errorData.error); 
+            alert(data.error); 
             
             // Gray out the button so they know they've already liked.
-            button.disabled = true;
-            button.innerText = "Forbidden to like!";
+            // button.disabled = true;
+            // button.innerText = "Forbidden to like!";
             return;
         }
-
-        const data = await response.json();
+        if (data.action == "like"){
+            button.innerText = "Liked!"
+            button.classList.add('liked'); // can style this later in css
+        }
+        else{
+            button.innerText = "Unliked!";
+            button.classList.add('unliked'); // same as above.
+        }
 
         // Update the like count if the backend returned a new count
         if (data.new_count !== undefined) {
             const post = button.closest('.book-post');
             const countDisplay = post.querySelector('.interest-count');
-            
             if (countDisplay) {
                 countDisplay.innerText = data.new_count;
             }

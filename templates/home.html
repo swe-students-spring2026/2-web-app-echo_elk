@@ -20,10 +20,10 @@
         <p>Interested: <span class="interest-count">{{ book.num_ppl_wanted | default("N/A") }}</span></p>
         <button class="like-btn" data-id="{{ book._id }}">
             {% if book._id in current_user.liked_posts %}
-                Liked! (Click to unlike)
+                Liked!
             {% else %}
-                Like this post.
-    {% endif %}
+                Click to like
+            {% endif %}
         </button>
     </div>
     {% endfor %}
