@@ -27,7 +27,6 @@
             instead of leaving the like button here.
         -->
 
-
         <!-- 
         {% if book.lender_id|string != current_user.id|string %}
             <button class="like-btn" data-id="{{ book._id }}">I want to borrow/buy</button>
@@ -36,6 +35,6 @@
         {% endif %}
         -->
     </div>
-    <a href="{{ url_for('home') }}" class="back-link">Back</a>
+    <a href="{{ back_url }}" class="back-link">Back</a>
 </div>
 {% endblock %}
