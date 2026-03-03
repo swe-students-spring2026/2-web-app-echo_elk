@@ -232,30 +232,40 @@ def like_book(book_id):
     bk_id = ObjectId(book_id)
 
     current_bk = db.posts.find_one({"_id": bk_id})
-    # Check if this book is in the user's 'sent_posts' list.
-    # If yes, they are the lender, and they shouldn't be able to like their own book.
+    # Should never happen since this button only exists for existing posts. But good to have.
+    if not current_bk:
+        return {"error": "Book not found"}, 404
+    # Check if current user sent this post.
     if str(current_bk.get('lender_id')) == str(current_user.id):
         return {"error": "Are you trying to like your own post? LOL"}, 400
-    # Check if the user has already liked this book.
-    # Because, reasonably, a user should only like a book once.
-    user = db.users.find_one({"_id": user_id, "liked_posts": bk_id})
-    if user:
-        return {"error": "You have already liked this book."}, 400
-    # If first time liking, add the book ID to the user's 'liked_posts' list.
-    db.users.update_one(
-        {"_id": user_id},
-        {"$push": {"liked_posts": bk_id}}
-    )
-
-    # increment the book's 'num_ppl_wanted' count.
+    # Check if curr_user has already liked this book.
+    liked_posts = current_user.liked_posts
+    if bk_id in liked_posts:
+        # post already liked, so unlike this post by removing ID from current user's liked_posts
+        db.users.update_one(
+            {"_id": user_id},
+            {"$pull": {"liked_posts": bk_id}}
+        )
+        like_num_change = -1
+        action = "unlike"
+    else:
+        # liking the post, add post ID to curr_user's liked_posts
+        db.users.update_one(
+            {"_id": user_id},
+            {"$push": {"liked_posts": bk_id}}
+        )
+        like_num_change = 1
+        action = "like"
+    # Update this book's corresponding fields
     result = db.posts.find_one_and_update(
-        {"_id": ObjectId(book_id)},
-        {"$inc": {"num_ppl_wanted": 1}},
-        return_document=True
+        {"_id": bk_id},
+        {"$inc": {"num_ppl_wanted": like_num_change}},
+        return_document=True # Make the function return the updated doc
     )
-    if result:
-        return {"new_count": result.get('num_ppl_wanted', 0)}, 200
-    return {"error": "Book not found"}, 404 # Should never happen, but good to have.
+    return {
+        "new_count": result.get('num_ppl_wanted', 0),
+        "action": action
+    }, 200
 
 @app.route('/book/<book_id>')
 @login_required
