@@ -272,12 +272,15 @@ def like_book(book_id):
 def book_details(book_id):
     """
     Displays detailed data for this book.
+    This page has two parents: home and account.
+    We allow users to go back to their previous page.
     """
     book = db.posts.find_one({"_id": ObjectId(book_id)})
+    back_url = request.referrer
     if not book:
         flash("Book not found!", "error")
         return redirect(url_for('home'))
-    return render_template('book_details.html', book=book)
+    return render_template('book_details.html', book=book, back_url=back_url)
 
 @app.route('/logout')
 @login_required

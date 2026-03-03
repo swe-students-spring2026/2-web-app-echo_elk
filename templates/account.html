@@ -46,7 +46,7 @@
         <h3>Posts I liked</h3>
         <div class="book-grid">
             {% for book in liked_books %}
-                <div class="book-post">
+                <div class="book-post" onclick="viewDetails('{{ book._id }}')">
                     <h4>{{ book.title }}</h4>
                     <p>Lender: {{ book.lender_name }}</p>
                 </div>
