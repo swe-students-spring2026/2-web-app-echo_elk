@@ -19,12 +19,19 @@ class User(UserMixin):
 
 def get_user_by_username(db, username):
     """
-    Retrieve user from the 'users' collection by username.
+    Retrieve a user document from the 'users' collection by username.
     """
     return db.users.find_one({"username": username})
 
 def get_user_by_id(db, user_id):
     """
-    Retrieve user from the 'users' collection by user_id.
+    Retrieve a user document from the 'users' collection by user_id.
     """
     return db.users.find_one({"_id": ObjectId(user_id)})
+
+def add_user_to_db(db, new_user_doc):
+    """
+    Add a new user document to the users collection.
+    new_user_doc is a dict.
+    """
+    return db.users.insert_one(new_user_doc)

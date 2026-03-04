@@ -3,18 +3,34 @@
 {% block content %}
 <div class="details-container">
     <div class="details-card">
-        <h1>{{ book.title }}</h1>
-        <p class="author">By {{ book.author }}</p>
+        <h1>{{ book.title | default("N/A") }}</h1>
+        <p class="author">By {{ book.author | default("N/A") }}</p>
+
+        <div class="book-images">
+            {% if book.images and book.images|length > 0 %}
+                {% for image in book.images %}
+                    <div class="book-image-wrapper">
+                        <img src="{{ url_for('static', filename='seed_post_imgs/' + image) }}" class="book-image" alt="Book Image">
+                    </div>
+                {% endfor %}
+            {% else %}
+                <img src="{{ url_for('static', filename='seed_post_imgs/no_image.png') }}" class="book-image">
+            {% endif %}
+        </div>
         
         <div class="book-info">
             <!-- 
             <p><strong>Genre:</strong> {{ book.genre }}</p>
             <p><strong>Condition:</strong> {{ book.condition }}</p>
-            <p><strong>Lender:</strong> {{ book.lender_name }}</p> 
             -->
-            <p><strong>Lender:</strong> {{ book.lender_name }}</p> 
-            <p><strong>Description:</strong></p>
-            <p class="description">{{ book.description }}</p>
+            <p><strong>Post sent by:</strong> {{ book.sender_name | default("N/A") }}</p>
+            <!-- <p> contact information </p> -->
+            <p><strong>This book is for:</strong> {{ book.listing_type | default("N/A") }}</p>
+            {% if book.listing_type == "Selling" %}
+                <p><strong> Price: </strong>${{ "%.2f"|format(book.price) }} </p>
+            {% endif %}
+            <p><strong>Other information:</strong></p>
+            <p class="other_info">{{ book.other_info | default("N/A") }}</p>
         </div>
         
         <div class="stats">

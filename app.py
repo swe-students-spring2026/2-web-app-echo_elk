@@ -6,8 +6,8 @@ user authentication, and database interaction.
 """
 import os
 import datetime
-from dotenv import load_dotenv
 from uuid import uuid4 as uuid_uuid4
+from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -75,14 +75,12 @@ def register():
         password = request.form.get('password')
         # Check if user already exists to avoid duplicates.
         # If yes, redirect back and give another chance.
-        if db.users.find_one({"username": username}):
+        if dbm.get_user_by_username(db, username):
             flash('Username already exists. Pick a different one!')
             return redirect(url_for('register'))
         # Hash the password for security
         hashed_password = generate_password_hash(password)
         # Create the user document based on the user schema.
-        # Create more fields later! e.g. email, liked_posts, sent_posts.
-        # Note that we should store post IDs.
         new_user = {
             "username": username,
             "password": hashed_password,
@@ -90,7 +88,7 @@ def register():
             "liked_posts": [],
             "sent_posts": []
         }
-        db.users.insert_one(new_user)
+        dbm.add_user_to_db(db, new_user)
         flash('Account created! Please login.')
         return redirect(url_for('login'))
     return render_template('register.html')
@@ -153,7 +151,7 @@ def account():
 
     # For GET requests
     # For the IDs stored in liked_posts
-    # find all post IDs that the user liked, some are deleted
+    # find all post IDs that the user liked, notice some might be deleted
     liked_ids = current_user.liked_posts
     # ids exist in both liked_posts and the posts collection
     found_books = list(db.posts.find({"_id": {"$in": liked_ids}}))
@@ -180,14 +178,15 @@ def delete_post(post_id):
     We don't handle deleting this book's ID for any user that liked this book. 
     That would be handled when we fetch the posts for the 'liked_posts' list in the account page,
     when a specific user enters their account page.
+    # TODO: Delete this post's images also.
     """
     p_id = ObjectId(post_id)
     user_id = ObjectId(current_user.id)
 
-    post = db.posts.find_one({"_id": p_id, "lender_id": str(user_id)})
+    post = db.posts.find_one({"_id": p_id, "sender_id": user_id})
     if not post:
-        # 403 means the server does not allow this action. 
-        # This should never happen because the delete button should only show for the lender, 
+        # 403 means the server does not allow this action.
+        # This should never happen because the delete button should only show for the lender,
         # but good to have just in case.
         return {"error": "Can't find this post or it's sender!"}, 403
     # Remove this post's ID from this user's 'sent_posts' field.
@@ -214,7 +213,7 @@ def create_post():
         author = request.form.get('author')
         listing_type = request.form.get('listing_type') # lending/selling/donating/showing off.
         price = request.form.get('price') # maybe empty if not selling.
-        print("Price is:", price, "Its type is", type(price)) # for debugging.
+        # print("Price is:", price, "Its type is", type(price)) # for debugging.
         other_info = request.form.get('other_info')
         files = request.files.getlist('images')
         # Check if verify all files have valid extensions before saving anything.
