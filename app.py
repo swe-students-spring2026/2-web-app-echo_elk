@@ -189,14 +189,26 @@ def delete_post(post_id):
         # This should never happen because the delete button should only show for the lender,
         # but good to have just in case.
         return {"error": "Can't find this post or it's sender!"}, 403
+    # Delete all images of this post.
+    post_images = post.get('images', [])
+    for filename in post_images:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}") # for debugging
+        except Exception as e:
+            print(f"Error deleting file {file_path}: {e}")
+
     # Remove this post's ID from this user's 'sent_posts' field.
     db.users.update_one({"_id": user_id}, {"$pull": {"sent_posts": p_id}})
     # Remove this post's ID from the posts collection.
     db.posts.delete_one({"_id": p_id})
 
-    # Clean up other users' liked lists. But this would be slow if many users.
-    # So we implement another way. See the docstring above for details.
+    # Clean up other users' liked lists.
     # db.users.update_many({"liked_posts": p_id}, {"$pull": {"liked_posts": p_id}})
+    # But this would be slow if many users.
+    # So we implement another way. See the docstring above for details.
     flash("Post successfully deleted!", "success")
     return redirect(url_for('account'))
 
@@ -229,6 +241,7 @@ def create_post():
                 file_ext = file.filename.rsplit('.', 1)[1].lower()
                 # new filename: user_id + random_uuid + original_ext
                 file_newname = f"{current_user.id}_{uuid_uuid4().hex}.{file_ext}"
+                file_newname = secure_filename(file_newname)
                 # make sure the folder to store images exists. If not, create one.
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], file_newname))
