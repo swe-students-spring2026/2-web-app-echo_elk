@@ -48,7 +48,7 @@
             {% for book in liked_books %}
                 <div class="book-post" onclick="viewDetails('{{ book._id }}')">
                     <h4>{{ book.title | default("N/A") }}</h4>
-                    <p>Lender: {{ book.sender_name | default("N/A") }}</p>
+                    <p>Posted by: {{ book.sender_name | default("N/A") }}</p>
                 </div>
             {% else %}
                 <p>You haven't liked any books yet.</p>
