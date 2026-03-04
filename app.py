@@ -178,7 +178,6 @@ def delete_post(post_id):
     We don't handle deleting this book's ID for any user that liked this book. 
     That would be handled when we fetch the posts for the 'liked_posts' list in the account page,
     when a specific user enters their account page.
-    # TODO: Delete this post's images also.
     """
     p_id = ObjectId(post_id)
     user_id = ObjectId(current_user.id)
