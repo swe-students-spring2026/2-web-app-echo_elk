@@ -89,6 +89,7 @@ async function handleLikeClick(event) {
 
 // You can think of the document object as the JavaScript representation of the current page.
 document.addEventListener("DOMContentLoaded", () => {
+    togglePriceField();
     const likeButtons = document.querySelectorAll('.like-btn')
 
     likeButtons.forEach(button => {

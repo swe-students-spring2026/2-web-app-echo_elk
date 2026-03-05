@@ -206,6 +206,43 @@ def account():
                            liked_books=found_books,
                            sent_books=sent_books)
 
+@app.route('/edit_post/<post_id>', methods=['GET', 'POST'])
+@login_required
+def edit_post(post_id):
+    """
+    In the account page, the lender can edit the post they sent.
+    """
+    post = db.posts.find_one({"_id": ObjectId(post_id), "sender_id": ObjectId(current_user.id)})
+    if not post:
+        flash("Post not found or unauthorized.", "error")
+        return redirect(url_for('account'))
+
+    if request.method == 'POST':
+        # Capture the updated fields
+        title = request.form.get('title')
+        author = request.form.get('author')
+        listing_type = request.form.get('listing_type')
+        price = request.form.get('price')
+        other_info = request.form.get('other_info')
+        available = request.form.get('available') == 'on' # Checkbox logic
+
+        updated_fields = {
+            "title": title,
+            "author": author,
+            "listing_type": listing_type,
+            "price": float(price) if price and listing_type == 'Selling' else None,
+            "other_info": other_info,
+            "available": available
+        }
+        db.posts.update_one(
+            {"_id": ObjectId(post_id), "sender_id": ObjectId(current_user.id)},
+            {"$set": updated_fields}
+        )
+        flash("Post updated successfully!", "success")
+        return redirect(url_for('account'))
+    return render_template('edit_post.html', post=post)
+
+
 @app.route('/delete-post/<post_id>', methods=['POST'])
 @login_required
 def delete_post(post_id):
