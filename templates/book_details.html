@@ -29,6 +29,14 @@
             {% if book.listing_type == "Selling" %}
                 <p><strong> Price: </strong>${{ "%.2f"|format(book.price) }} </p>
             {% endif %}
+            <p>
+                <strong>Book Status:</strong>
+                {% if book.available %}
+                    <span class="available">Available</span>
+                {% else %}
+                    <span class="currently_out">Currently out</span>
+                {% endif %}
+            </p>
             <p><strong>Other information:</strong></p>
             <p class="other_info">{{ book.other_info | default("N/A") }}</p>
         </div>
