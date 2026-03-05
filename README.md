@@ -4,14 +4,9 @@ A little exercise to build a web application following an agile development proc
 
 ## Product vision statement
 
-See instructions. Delete this line and place the Product Vision Statement here.
+NYU Book Exchange is an online marketplace where students can buy, sell, rent and exchange second-hand books.
 
 ## User stories
-
-See instructions. Delete this line and place a link to the user stories here. (Delete this before submission).
-
-Note: According to the instruction, user stories should be created as Issues in the team's GitHub repository.
-A link to the Issues page should be included in the README.md file. (Delete this before submission).
 
 ### User Type A (Book Lender/Seller):
 
@@ -52,8 +47,6 @@ As a book borrower/buyer, I want to compare prices between listings of the same 
 
 [Link to our Issues page!](https://github.com/swe-students-spring2026/2-web-app-echo_elk/issues)
 ## Steps necessary to run the software
-
-See instructions. Delete this line and place instructions to download, configure, and run the software here.
 
 ```shell
 # First, clone this repository.
