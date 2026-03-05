@@ -24,7 +24,7 @@
             <p><strong>Condition:</strong> {{ book.condition }}</p>
             -->
             <p><strong>Post sent by:</strong> {{ book.sender_name | default("N/A") }}</p>
-            <!-- <p> contact information </p> -->
+            <p><strong>Contact information:</strong> {{ user.email | default("N/A") }}</p>
             <p><strong>This book is for:</strong> {{ book.listing_type | default("N/A") }}</p>
             {% if book.listing_type == "Selling" %}
                 <p><strong> Price: </strong>${{ "%.2f"|format(book.price) }} </p>

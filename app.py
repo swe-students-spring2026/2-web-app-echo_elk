@@ -329,13 +329,15 @@ def book_details(book_id):
     Displays detailed data for this book.
     This page has two parents: home and account.
     We allow users to go back to their previous page.
+    We also fetch the sender's user 
     """
     book = db.posts.find_one({"_id": ObjectId(book_id)})
+    user = db.users.find_one({"_id": book.get('sender_id')}) if book else None
     back_url = request.referrer
     if not book:
         flash("Book not found!", "error")
         return redirect(url_for('home'))
-    return render_template('book_details.html', book=book, back_url=back_url)
+    return render_template('book_details.html', book=book, user=user, back_url=back_url)
 
 @app.route('/logout')
 @login_required
