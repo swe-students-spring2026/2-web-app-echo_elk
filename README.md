@@ -8,6 +8,7 @@ NYU Book Exchange is an online marketplace where students can buy, sell, rent an
 
 ## User stories
 
+
 ### User Type A (Book Lender/Seller):
 
 As a book lender/seller, I want to keep track of all books that I finished reading and wanted to lend in the platform, so that I will not mix up with other books I haven't read.
