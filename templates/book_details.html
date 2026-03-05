@@ -2,7 +2,13 @@
 
 {% block content %}
 <div class="details-container">
-    <div class="details-card">
+    <div class="details-card"
+                {% if book.listing_type == 'Selling' %}mode-selling
+                {% elif book.listing_type == 'Lending' %}mode-lending
+                {% elif book.listing_type == 'Donating' %}mode-donating
+                {% endif %}
+                {% if not book.available %}is-unavailable
+                {% endif %}">
         <h1>{{ book.title | default("N/A") }}</h1>
         <p class="author">By {{ book.author | default("N/A") }}</p>
 
