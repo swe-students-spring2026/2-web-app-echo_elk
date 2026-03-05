@@ -4,7 +4,20 @@
 
 <div class="search-container">
     <form action="/" method="GET">
-        <input type="text" name="query" placeholder="Search by genre, author, keyword...", value="{{enteredQuery}}">
+        <input type="text" name="query" placeholder="Search by title, author, description...", value="{{enteredQuery}}">
+        <label>Availability:</label>
+        <select name="availability" id="availability-select">
+            <option value="">Any</option>
+            <option value="true">Avaliable</option>
+            <option value="false">Not Avaliable</option>
+        </select>
+        <label>Listing Type:</label>
+        <select name="listing-type" id="listing-type-select">
+            <option value="">Any</option>
+            <option value="Selling">Selling</option>
+            <option value="Donating">Donating</option>
+            <option value="Renting">Renting</option>
+        </select>
         <button type="submit">Search</button>
     </form>
 </div>

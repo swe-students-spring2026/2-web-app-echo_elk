@@ -40,6 +40,9 @@ UPLOAD_FOLDER = 'static/seed_post_imgs'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Global variables
+VALID_SEARCH_FIELDS = ['title', 'author', 'sender_name', 'other_info']
+
 def allowed_file(filename):
     """
     Helper function, check if filename has allowed extension.
@@ -116,19 +119,53 @@ def login():
 @login_required
 def home():
     """
-    Fetch all posts from MongoDB.
+    Fetch posts from MongoDB.
     """
-    # TODO: Perhaps support search query like
-    # "title:Foo author:Foo Barstein", etc.
     query = request.args.get('query', '')
-    books = list(db.posts.find({
-            "$or": [
-                {"title": {"$regex": query, "$options": "i"}},
-                {"author": {"$regex": query, "$options": "i"}},
-                {"other_info": {"$regex": query, "$options": "i"}},
-                {"sender_name": {"$regex": query, "$options": "i"}}
+    terms = query.split()
+    regular_terms = []
+    advanced_terms = {}
+
+    availability_raw = request.args.get('availability', '').strip()
+    listing_type = request.args.get('listing-type', '').strip()
+
+    # Try to look for terms with advanced search syntax
+    # if the key is not in the valid search list, process as regular search term
+    # for example, it doesn't search for "sapiens" in the DB for "Sapiens: A Brief History of Humankind"
+    for term in terms:
+        if ":" in term:
+            k, v = term.split(':',1)
+            k, v = k.strip(), v.strip()
+            if k in VALID_SEARCH_FIELDS:
+                advanced_terms.setdefault(k, []).append(v)
+            else:
+                regular_terms.append(term.strip())
+        else:
+            regular_terms.append(term.strip())
+
+    and_clauses = []
+    for term in regular_terms:
+        if not term:
+            continue
+        and_clauses.append({
+            '$or': [
+                {field: {"$regex": term, "$options": "i"}}
+                for field in VALID_SEARCH_FIELDS
             ]
-        }))
+        })
+    for key, values in advanced_terms.items():
+        for val in values:
+            and_clauses.append({key: {"$regex": val, "$options": "i"}})
+
+    # filters
+    if availability_raw in ('true', 'false'):
+        and_clauses.append({"available": (availability_raw == "true")})
+    if listing_type:
+        and_clauses.append({"listing_type": listing_type})
+
+    filter_query = {"$and": and_clauses} if and_clauses else {}
+    books = db.posts.find(filter_query)
+
     return render_template('home.html', books = books, enteredQuery = query)
 
 @app.route('/account', methods=['GET', 'POST'])
