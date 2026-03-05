@@ -6,12 +6,12 @@ user authentication, and database interaction.
 """
 import os
 import datetime
-import re
 from uuid import uuid4 as uuid_uuid4
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
 from bson.objectid import ObjectId
 from pymongo import MongoClient
 
@@ -78,14 +78,12 @@ def register():
         password = request.form.get('password')
         # Check if user already exists to avoid duplicates.
         # If yes, redirect back and give another chance.
-        if db.users.find_one({"username": username}):
+        if dbm.get_user_by_username(db, username):
             flash('Username already exists. Pick a different one!')
             return redirect(url_for('register'))
         # Hash the password for security
         hashed_password = generate_password_hash(password)
         # Create the user document based on the user schema.
-        # Create more fields later! e.g. email, liked_posts, sent_posts.
-        # Note that we should store post IDs.
         new_user = {
             "username": username,
             "password": hashed_password,
@@ -93,7 +91,7 @@ def register():
             "liked_posts": [],
             "sent_posts": []
         }
-        db.users.insert_one(new_user)
+        dbm.add_user_to_db(db, new_user)
         flash('Account created! Please login.')
         return redirect(url_for('login'))
     return render_template('register.html')
@@ -188,14 +186,67 @@ def account():
         flash("Account updated successfully!", "success")
         return redirect(url_for('account'))
 
-    # For GET requests, we need to fetch the actual post details
-    # for the IDs stored in liked_posts and sent_posts
-    liked_books = list(db.posts.find({"_id": {"$in": current_user.liked_posts}}))
+    # For GET requests
+    # For the IDs stored in liked_posts
+    # find all post IDs that the user liked, notice some might be deleted
+    liked_ids = current_user.liked_posts
+    # ids exist in both liked_posts and the posts collection
+    found_books = list(db.posts.find({"_id": {"$in": liked_ids}}))
+    found_ids = [post['_id'] for post in found_books]
+    ghost_ids = list(set(liked_ids) - set(found_ids))
+    if ghost_ids:
+        db.users.update_one(
+            {"_id": ObjectId(current_user.id)},
+            {"$pull": {"liked_posts": {"$in": ghost_ids}}}
+        )
+    # for the IDs stored in sent_posts
     sent_books = list(db.posts.find({"_id": {"$in": current_user.sent_posts}}))
 
     return render_template('account.html',
-                           liked_books=liked_books,
+                           liked_books=found_books,
                            sent_books=sent_books)
+
+@app.route('/delete-post/<post_id>', methods=['POST'])
+@login_required
+def delete_post(post_id):
+    """
+    Deletes a book post in each user's account page.
+    Removes the post ID from the user's 'sent_posts' list and from all users' 'liked_posts' lists.
+    We don't handle deleting this book's ID for any user that liked this book. 
+    That would be handled when we fetch the posts for the 'liked_posts' list in the account page,
+    when a specific user enters their account page.
+    """
+    p_id = ObjectId(post_id)
+    user_id = ObjectId(current_user.id)
+
+    post = db.posts.find_one({"_id": p_id, "sender_id": user_id})
+    if not post:
+        # 403 means the server does not allow this action.
+        # This should never happen because the delete button should only show for the lender,
+        # but good to have just in case.
+        return {"error": "Can't find this post or it's sender!"}, 403
+    # Delete all images of this post.
+    post_images = post.get('images', [])
+    for filename in post_images:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}") # for debugging
+        except Exception as e:
+            print(f"Error deleting file {file_path}: {e}")
+
+    # Remove this post's ID from this user's 'sent_posts' field.
+    db.users.update_one({"_id": user_id}, {"$pull": {"sent_posts": p_id}})
+    # Remove this post's ID from the posts collection.
+    db.posts.delete_one({"_id": p_id})
+
+    # Clean up other users' liked lists.
+    # db.users.update_many({"liked_posts": p_id}, {"$pull": {"liked_posts": p_id}})
+    # But this would be slow if many users.
+    # So we implement another way. See the docstring above for details.
+    flash("Post successfully deleted!", "success")
+    return redirect(url_for('account'))
 
 @app.route('/create-post', methods=['GET', 'POST'])
 @login_required
@@ -205,18 +256,49 @@ def create_post():
     Links the new post ID to the user's 'sent_post' list.
     """
     if request.method == 'POST':
+        # Get the form data for the new post from request.
         title = request.form.get('title')
         author = request.form.get('author')
-        description = request.form.get('description') # create more fields later.
+        listing_type = request.form.get('listing_type') # lending/selling/donating/showing off.
+        price = request.form.get('price') # maybe empty if not selling.
+        # print("Price is:", price, "Its type is", type(price)) # for debugging.
+        other_info = request.form.get('other_info')
+        files = request.files.getlist('images')
+        # Check if verify all files have valid extensions before saving anything.
+        for file in files:
+            if file and file.filename:
+                if not allowed_file(file.filename):
+                    flash(f"We only support {', '.join(ALLOWED_EXTENSIONS)}.", "error")
+                    return render_template('create_post.html')
+        # Handle uploaded images
+        image_filenames = []
+        for file in files:
+            if file and file.filename:
+                file_ext = file.filename.rsplit('.', 1)[1].lower()
+                # new filename: user_id + random_uuid + original_ext
+                file_newname = f"{current_user.id}_{uuid_uuid4().hex}.{file_ext}"
+                file_newname = secure_filename(file_newname)
+                # make sure the folder to store images exists. If not, create one.
+                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], file_newname))
+                image_filenames.append(file_newname)
         new_post = {
             "title": title,
             "author": author,
-            "description": description,
-            "lender_id": current_user.id, 
-            "lender_name": current_user.username,
+            "listing_type": listing_type,
+            "price": float(price) if price else None,
+            "images": image_filenames, # a list of images uploaded.
+            "other_info": other_info,
+            "sender_id": ObjectId(current_user.id), # sender as in post sender.
+            "sender_name": current_user.username,
+            # "sender_email": current_user.email,
+            # If a user changes their email. This post might be fucked up.
+            # Make the logic clearer. We can discuss later.
             'num_ppl_wanted': 0,
-            "created_at": datetime.datetime.now(datetime.timezone.utc)
+            "created_at": datetime.datetime.now(datetime.timezone.utc),
+            "available": True
         }
+
         current_post = db.posts.insert_one(new_post)
         current_post_id = current_post.inserted_id
         # Update the current_user's 'sent_post' list with the ID of this new post.
@@ -242,39 +324,57 @@ def like_book(book_id):
     bk_id = ObjectId(book_id)
 
     current_bk = db.posts.find_one({"_id": bk_id})
-    # Check if this book is in the user's 'sent_posts' list.
-    # If yes, they are the lender, and they shouldn't be able to like their own book.
-    if str(current_bk.get('lender_id')) == str(current_user.id):
+    # Should never happen since this button only exists for existing posts. But good to have.
+    if not current_bk:
+        return {"error": "Book not found"}, 404
+    # Check if current user sent this post.
+    if str(current_bk.get('sender_id')) == str(current_user.id):
         return {"error": "Are you trying to like your own post? LOL"}, 400
-    # Check if the user has already liked this book.
-    # Because, reasonably, a user should only like a book once.
-    user = db.users.find_one({"_id": user_id, "liked_posts": bk_id})
-    if user:
-        return {"error": "You have already liked this book."}, 400
-    # If first time liking, add the book ID to the user's 'liked_posts' list.
-    db.users.update_one(
-        {"_id": user_id},
-        {"$push": {"liked_posts": bk_id}}
-    )
-
-    # increment the book's 'num_ppl_wanted' count.
+    # Check if curr_user has already liked this book.
+    liked_posts = current_user.liked_posts
+    if bk_id in liked_posts:
+        # post already liked, so unlike this post by removing ID from current user's liked_posts
+        db.users.update_one(
+            {"_id": user_id},
+            {"$pull": {"liked_posts": bk_id}}
+        )
+        like_num_change = -1
+        action = "unlike"
+    else:
+        # liking the post, add post ID to curr_user's liked_posts
+        db.users.update_one(
+            {"_id": user_id},
+            {"$push": {"liked_posts": bk_id}}
+        )
+        like_num_change = 1
+        action = "like"
+    # Update this book's corresponding fields
     result = db.posts.find_one_and_update(
-        {"_id": ObjectId(book_id)},
-        {"$inc": {"num_ppl_wanted": 1}},
-        return_document=True
+        {"_id": bk_id},
+        {"$inc": {"num_ppl_wanted": like_num_change}},
+        return_document=True # Make the function return the updated doc
     )
-    if result:
-        return {"new_count": result.get('num_ppl_wanted', 0)}, 200
-    return {"error": "Book not found"}, 404 # Should never happen, but good to have.
+    return {
+        "new_count": result.get('num_ppl_wanted', 0),
+        "action": action
+    }, 200
 
 @app.route('/book/<book_id>')
 @login_required
 def book_details(book_id):
     """
     Displays detailed data for this book.
+    This page has two parents: home and account.
+    We allow users to go back to their previous page.
+    We also fetch the sender's user 
     """
-    # logic for fetching single book would go here
-    return render_template('book_details.html')
+    book = db.posts.find_one({"_id": ObjectId(book_id)})
+    user = db.users.find_one({"_id": book.get('sender_id')}) if book else None
+    back_url = request.referrer
+    if not book:
+        flash("Book not found!", "error")
+        return redirect(url_for('home'))
+    return render_template('book_details.html', book=book, user=user, back_url=back_url)
 
 @app.route('/logout')
 @login_required

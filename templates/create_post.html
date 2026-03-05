@@ -2,13 +2,41 @@
 
 {% block content %}
 <div class="form-container">
-    <h2>Lend a Book</h2>
+    <h2>Lend or Sell a Book</h2>
     <p>Fill out the details below to make a post about your book!</p>
     
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         <input type="text" name="title" placeholder="Book Title" required>
         <input type="text" name="author" placeholder="Author" required>
-        <textarea name="description" placeholder="Condition, pickup location, or return date..." rows="5"></textarea>
+
+        <div class="form-group">
+            <label for="listing_type">I am:</label>
+            <select name="listing_type" id="listing_type" onchange="togglePriceField()" required>
+                <option value="Selling">Selling</option>
+                <option value="Lending">Lending</option>
+                <option value="Donating">Donating (Take this for free)</option>
+                <option value="ShowingOff">Just showing off my book. LOL</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="price-container"> <!-- style="display: none;" -->
+            <label for="price">Estimated Price ($):</label>
+            <input type="number" name="price" id="price" min="0" step="0.01" placeholder="0.00">
+        </div>
+
+        <div class="form-group">
+            <label for="images">Upload Book Photos:</label> <!-- (First one is the cover) -->
+            <input type="file" name="images" id="images" accept="image/*" multiple>
+            <!-- 
+            type='file' tells the browser to open up a file picker. and tells flask to look for this in request.files.
+            name='images' is for python backend to look for this in a more specific way.
+            id='images' is for css and js to select this element.
+            accept means to allow users to pick files with image extensions. (like png, jpg..)
+            multiple allows users to shift select multiple files for convenience.
+            -->
+        </div>
+
+        <textarea name="other_info" placeholder="Anything else you want to say..." rows="5"></textarea>
         
         <button type="submit" class="btn-primary">Send Post</button>
         <a href="{{ url_for('home') }}" class="btn-secondary">Cancel</a>
