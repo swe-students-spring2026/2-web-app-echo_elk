@@ -1,0 +1,51 @@
+<!-- Page to be rendered if a user wants to modify fields of their sent posts. -->
+<!-- Maybe add a class 'btn' to all other buttons. -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <p>Update your post!</p>
+    
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="title" value="{{ post.title }}" required>
+        <input type="text" name="author" value="{{ post.author }}" required>
+
+        <div class="form-group">
+            <label for="listing_type">I am:</label>
+            <select name="listing_type" id="listing_type" onchange="togglePriceField()" required>
+                <option value="Selling" {% if post.listing_type == 'Selling' %}selected{% endif %}>Selling</option>
+                <option value="Lending" {% if post.listing_type == 'Lending' %}selected{% endif %}>Lending</option>
+                <option value="Donating" {% if post.listing_type == 'Donating' %}selected{% endif %}>Donating (Take this for free)</option>
+                <option value="ShowingOff" {% if post.listing_type == 'ShowingOff' %}selected{% endif %}>Just showing off my book. LOL</option>
+            </select>
+            <label>
+                <input type="checkbox" name="available" {% if post.available %}checked{% endif %}>
+                Mark as Available
+            </label>
+        </div>
+
+        <div class="form-group" id="price-container"> <!-- style="display: none;" -->
+            <label for="price">Estimated Price ($):</label>
+            <input type="number" name="price" id="price" min="0" step="0.01" value="{{ post.price }}">
+        </div>
+
+        <!-- No image modification for now.
+        <div class="form-group">
+            <label for="images">Upload Book Photos:</label> (First one is the cover)
+            <input type="file" name="images" id="images" accept="image/*" multiple>
+
+            type='file' tells the browser to open up a file picker. and tells flask to look for this in request.files.
+            name='images' is for python backend to look for this in a more specific way.
+            id='images' is for css and js to select this element.
+            accept means to allow users to pick files with image extensions. (like png, jpg..)
+            multiple allows users to shift select multiple files for convenience.
+        </div> 
+        -->
+
+        <textarea name="other_info" rows="5">{{ post.other_info }}</textarea>
+        
+        <button type="submit" class="btn-primary">Save Changes</button>
+        <a href="{{ url_for('account') }}" class="btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}
