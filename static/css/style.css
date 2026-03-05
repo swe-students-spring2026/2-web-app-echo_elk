@@ -26,7 +26,7 @@
     border: 1px solid #000000;
     border-radius: 8px;
     padding: 16px;
-    background-color: #fff;
+    background-color: var(--mode-color);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     cursor: pointer;
     transition: transform 0.2s;
@@ -45,6 +45,25 @@
     transform: translateY(-4px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
+
+/* Book Status Coloring */
+.mode-selling {
+    --mode-color: #ffe5e5;
+}
+
+.mode-lending {
+    --mode-color: #e6f0ff;
+}
+
+.mode-donating {
+    --mode-color: #e6fff2;
+}
+
+.is-unavailable {
+    filter: grayscale(40%);
+    opacity: 0.75;
+}
+
 
 .book-cover {
     width: 100%;
