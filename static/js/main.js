@@ -22,8 +22,6 @@ function viewDetails(bookId) {
 
 function togglePriceField() {
     const selector = document.getElementById('listing_type');
-    if (!selector) return;
-
     const priceContainer = document.getElementById('price-container');
     const priceInput = document.getElementById('price');
 
@@ -69,11 +67,11 @@ async function handleLikeClick(event) {
         }
         if (data.action == "like"){
             button.innerText = "Liked!"
-            button.classList.replace('unliked', 'liked');
+            button.classList.add('liked'); // can style this later in css
         }
         else{
             button.innerText = "Unliked!";
-            button.classList.replace('liked', 'unliked');
+            button.classList.add('unliked'); // same as above.
         }
 
         // Update the like count if the backend returned a new count
@@ -92,8 +90,8 @@ async function handleLikeClick(event) {
 // You can think of the document object as the JavaScript representation of the current page.
 document.addEventListener("DOMContentLoaded", () => {
     togglePriceField();
-
     const likeButtons = document.querySelectorAll('.like-btn')
+
     likeButtons.forEach(button => {
         button.addEventListener('click', handleLikeClick);
     });
